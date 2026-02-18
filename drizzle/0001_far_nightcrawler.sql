@@ -1,0 +1,2 @@
+ALTER TABLE "transactions" ADD COLUMN "transfer_to_wallet_id" uuid;--> statement-breakpoint
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_transfer_to_wallet_id_wallets_id_fk" FOREIGN KEY ("transfer_to_wallet_id") REFERENCES "public"."wallets"("id") ON DELETE set null ON UPDATE no action;
