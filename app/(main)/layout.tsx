@@ -1,12 +1,18 @@
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { MainNav, MobileNav } from '@/components/main-nav'
 
-
-
-export default function MainLayout({
+export default async function MainLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Server-side auth check (replaces deprecated middleware)
+  const cookieStore = await cookies()
+  const authCookie = cookieStore.get('auth_session')
+  if (authCookie?.value !== 'authenticated') {
+    redirect('/login')
+  }
   return (
     <div className="flex min-h-screen bg-muted/30">
       {/* Desktop Sidebar */}
