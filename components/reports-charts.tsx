@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 interface ReportsChartsProps {
   pieData: { name: string; value: number }[]
@@ -38,7 +39,7 @@ export function ReportsCharts({ pieData, barData }: ReportsChartsProps) {
                   ))}
                 </Pie>
                 <Tooltip 
-                   formatter={(value: number) => `฿${value.toLocaleString()}`}
+                   formatter={(value: any) => `฿${Number(value).toLocaleString()}`}
                    contentStyle={{ backgroundColor: 'white', borderRadius: '8px' }}
                 />
                 <Legend />
@@ -82,7 +83,7 @@ export function ReportsCharts({ pieData, barData }: ReportsChartsProps) {
                    tickFormatter={(value) => `฿${value}`}
                 />
                 <Tooltip 
-                   formatter={(value: number) => `฿${value.toLocaleString()}`}
+                   formatter={(value: any) => `฿${Number(value).toLocaleString()}`}
                    contentStyle={{ backgroundColor: 'white', borderRadius: '8px' }}
                 />
                 <Legend />
