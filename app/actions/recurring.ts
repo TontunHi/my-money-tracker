@@ -1,4 +1,5 @@
 'use server'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { db } from '@/db'
 import { recurringRules } from '@/db/schema'

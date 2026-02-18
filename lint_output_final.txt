@@ -1,0 +1,112 @@
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\(main)\categories\categories-client.tsx
+   14:10  warning  'Card' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   14:16  warning  'CardContent' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   14:29  warning  'CardHeader' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   14:41  warning  'CardTitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  141:12  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\(main)\categories\categories-client.tsx:141:12
+  139 |         </TabsList>
+  140 |         <TabsContent value="income" className="mt-0">
+> 141 |           <CategoryTable data={incomeCategories} />
+      |            ^^^^^^^^^^^^^ This component is created during render
+  142 |         </TabsContent>
+  143 |         <TabsContent value="expense" className="mt-0">
+  144 |           <CategoryTable data={expenseCategories} />
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\(main)\categories\categories-client.tsx:51:25
+   49 |   const expenseCategories = categories.filter(c => c.type === 'expense')
+   50 |
+>  51 |   const CategoryTable = ({ data }: { data: Category[] }) => (
+      |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  52 |     <div className="rounded-md border bg-background/50 backdrop-blur-sm">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  53 |       <Table>
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 107 |   )
+      | ^^^^ The component is created during render here
+  108 |
+  109 |   return (
+  110 |     <div className="space-y-6 animate-in fade-in duration-500">  react-hooks/static-components
+  144:12  error    Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\(main)\categories\categories-client.tsx:144:12
+  142 |         </TabsContent>
+  143 |         <TabsContent value="expense" className="mt-0">
+> 144 |           <CategoryTable data={expenseCategories} />
+      |            ^^^^^^^^^^^^^ This component is created during render
+  145 |         </TabsContent>
+  146 |       </Tabs>
+  147 |     </div>
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\(main)\categories\categories-client.tsx:51:25
+   49 |   const expenseCategories = categories.filter(c => c.type === 'expense')
+   50 |
+>  51 |   const CategoryTable = ({ data }: { data: Category[] }) => (
+      |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  52 |     <div className="rounded-md border bg-background/50 backdrop-blur-sm">
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  53 |       <Table>
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     </div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 107 |   )
+      | ^^^^ The component is created during render here
+  108 |
+  109 |   return (
+  110 |     <div className="space-y-6 animate-in fade-in duration-500">                                                                                react-hooks/static-components
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\(main)\layout.tsx
+  16:14  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\(main)\reports\page.tsx
+  5:52  warning  'CardDescription' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\actions\categories.ts
+  35:12  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+  46:12  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+  75:12  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\actions\recurring.ts
+  39:12  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+  49:12  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\actions\transactions.ts
+   85:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  129:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\app\actions\wallets.ts
+  39:12  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+  50:12  warning  '_error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\components\category-form.tsx
+  45:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\components\main-nav.tsx
+  5:63  warning  'CalendarDays' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\components\transaction-form.tsx
+  81:16  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+C:\Users\Administrator\Downloads\project\my-money-tracker\components\transaction-form.tsx:81:16
+  79 |   })
+  80 |
+> 81 |   const type = form.watch('type')
+     |                ^^^^ React Hook Form's `useForm()` API returns a `watch()` function which cannot be memoized safely.
+  82 |
+  83 |   async function onSubmit(values: z.infer<typeof formSchema>) {
+  84 |     setIsPending(true)  react-hooks/incompatible-library
+
+✖ 20 problems (3 errors, 17 warnings)
+

@@ -16,7 +16,6 @@ export async function GET(request: Request) {
     // Find due rules
     const dueRules = await db.select().from(recurringRules)
       .where(
-        //@ts-ignore - dte lte might have type issues with date object vs string but usually fine in drizzle
         lte(recurringRules.nextDueDate, now)
       );
 

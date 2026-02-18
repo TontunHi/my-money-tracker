@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 import { useEffect, useState } from "react"

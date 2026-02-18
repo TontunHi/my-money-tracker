@@ -1,0 +1,39 @@
+
+> my-money-tracker@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./components/category-form.tsx:23:1
+Ecmascript file had an error
+  21 |   SelectValue,
+  22 | } from '@/components/ui/select'
+> 23 | 'use client'
+     | ^^^^^^^^^^^^
+  24 | /* eslint-disable @typescript-eslint/no-explicit-any */
+  25 | import { Loader2 } from 'lucide-react'
+  26 |
+
+The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+
+Import traces:
+  Client Component Browser:
+    ./components/category-form.tsx [Client Component Browser]
+    ./app/(main)/categories/categories-client.tsx [Client Component Browser]
+    ./app/(main)/categories/categories-client.tsx [Server Component]
+    ./app/(main)/categories/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./components/category-form.tsx [Client Component SSR]
+    ./app/(main)/categories/categories-client.tsx [Client Component SSR]
+    ./app/(main)/categories/categories-client.tsx [Server Component]
+    ./app/(main)/categories/page.tsx [Server Component]
+
+
+    at <unknown> (./components/category-form.tsx:23:1)

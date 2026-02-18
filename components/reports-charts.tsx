@@ -1,3 +1,4 @@
+
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -39,7 +40,7 @@ export function ReportsCharts({ pieData, barData }: ReportsChartsProps) {
                   ))}
                 </Pie>
                 <Tooltip 
-                   formatter={(value: any) => `฿${Number(value).toLocaleString()}`}
+                   formatter={(value: ValueType | undefined) => [`฿${Number(value ?? 0).toLocaleString()}`, 'Amount']}
                    contentStyle={{ backgroundColor: 'white', borderRadius: '8px' }}
                 />
                 <Legend />
@@ -83,7 +84,7 @@ export function ReportsCharts({ pieData, barData }: ReportsChartsProps) {
                    tickFormatter={(value) => `฿${value}`}
                 />
                 <Tooltip 
-                   formatter={(value: any) => `฿${Number(value).toLocaleString()}`}
+                   formatter={(value: ValueType | undefined) => [`฿${Number(value ?? 0).toLocaleString()}`, 'Amount']}
                    contentStyle={{ backgroundColor: 'white', borderRadius: '8px' }}
                 />
                 <Legend />

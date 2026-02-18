@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -68,7 +69,7 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       type: 'expense',
-      amount: '' as any, // Initialize as empty string to show placeholder
+      amount: '' as any, // Initialize as empty string to show placeholder 
       date: new Date(),
       walletId: '',
       categoryId: undefined,

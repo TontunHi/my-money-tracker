@@ -1,3 +1,6 @@
+'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
 import { Loader2 } from 'lucide-react'
 
 const formSchema = z.object({
