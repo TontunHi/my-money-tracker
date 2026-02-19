@@ -25,8 +25,8 @@ export function QuickTransactionButton({ wallets, categories }: QuickTransaction
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg" className="rounded-full shadow-lg hover:shadow-primary/25 transition-all font-semibold">
-          <Plus className="mr-2 h-5 w-5" /> Quick Transaction
+        <Button size="lg" className="rounded-full shadow-lg hover:shadow-primary/25 transition-all font-bold bg-gradient-to-r from-primary to-primary/80 hover:scale-105 active:scale-95">
+          <Plus className="mr-2 h-5 w-5" /> Add Transaction
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

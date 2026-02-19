@@ -2,11 +2,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { format } from 'date-fns'
-import { CalendarIcon, Loader2, TrendingUp, TrendingDown, ArrowUpRight } from 'lucide-react'
+import { format, subDays } from 'date-fns'
+import { 
+  CalendarIcon, 
+  Loader2, 
+  TrendingUp, 
+  TrendingDown, 
+  ArrowUpRight, 
+  Wallet,
+  Laptop,
+  Utensils,
+  Bus,
+  ShoppingBag,
+  Film,
+  Zap,
+  Heart,
+  Plane,
+  GraduationCap,
+  Smile,
+  CircleDollarSign,
+  Landmark,
+  CreditCard,
+  Coins,
+  Gamepad2
+} from 'lucide-react'
 import { createTransaction } from '@/app/actions/transactions'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -29,10 +52,28 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { toast } from 'sonner'
 
-// Wait, I didn't install toast. I'll just use simple alert or local state for now, or install toast in next step.
-// For now, I'll allow form to close on success or show error text.
+// Map of icon names to Lucide components
+const IconMap: Record<string, any> = {
+  Wallet,
+  Laptop,
+  TrendingUp,
+  Utensils,
+  Bus,
+  ShoppingBag,
+  Film,
+  Zap,
+  Heart,
+  Plane,
+  GraduationCap,
+  Smile,
+  CircleDollarSign,
+  Landmark,
+  CreditCard,
+  Coins,
+  Gamepad2
+}
 
 const formSchema = z.object({
   type: z.enum(['income', 'expense', 'transfer']),
@@ -56,22 +97,24 @@ const formSchema = z.object({
 });
 
 type TransactionFormProps = {
-  wallets: { id: string; name: string; balance: string | number }[]; // Adjusted for decimal type
-  categories: { id: string; name: string; type: 'income' | 'expense' }[];
+  wallets: { id: string; name: string; balance: string | number }[];
+  categories: { id: string; name: string; type: 'income' | 'expense'; icon?: string }[];
   onSuccess?: () => void;
 }
 
 export function TransactionForm({ wallets, categories, onSuccess }: TransactionFormProps) {
   const [isPending, setIsPending] = useState(false)
-  const [serverError, setServerError] = useState<string | null>(null)
+  const router = useRouter()
+
+  const defaultWalletId = wallets.length > 0 ? wallets[0].id : '';
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       type: 'expense',
-      amount: '' as any, // Initialize as empty string to show placeholder 
+      amount: '' as any,
       date: new Date(),
-      walletId: '',
+      walletId: defaultWalletId,
       categoryId: undefined,
       transferToWalletId: undefined,
       note: '',
@@ -80,30 +123,76 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
 
   const type = form.watch('type')
 
+  if (wallets.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
+        <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center">
+          <Wallet className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <div>
+          <h3 className="font-bold text-lg">No Wallets Found</h3>
+          <p className="text-muted-foreground text-sm mt-1 max-w-[250px]">Please create a wallet first before adding transactions.</p>
+        </div>
+      </div>
+    )
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsPending(true)
-    setServerError(null)
-
-    const formData = new FormData()
-    formData.append('type', values.type)
-    formData.append('amount', values.amount.toString())
-    formData.append('date', values.date.toISOString())
-    formData.append('walletId', values.walletId)
-    if (values.categoryId) formData.append('categoryId', values.categoryId)
-    if (values.transferToWalletId) formData.append('transferToWalletId', values.transferToWalletId)
-    if (values.note) formData.append('note', values.note)
-
-    const result = await createTransaction(null, formData)
     
-    if (result?.errors) {
-       // handle field errors if needed, but client validation usually catches them
-    } else if (result?.message) {
-       setServerError(result.message)
-    } else {
-       form.reset()
-       onSuccess?.()
+    try {
+      const formData = new FormData()
+      formData.append('type', values.type)
+      formData.append('amount', values.amount.toString())
+      formData.append('date', values.date.toISOString())
+      formData.append('walletId', values.walletId)
+      if (values.categoryId) formData.append('categoryId', values.categoryId)
+      if (values.transferToWalletId) formData.append('transferToWalletId', values.transferToWalletId)
+      if (values.note) formData.append('note', values.note)
+
+      console.log('Submitting transaction:', values);
+
+      const result = await createTransaction(null, formData)
+      
+      if ((result?.errors && Object.keys(result.errors).length > 0) || (result?.rootErrors && result.rootErrors.length > 0)) {
+         const errorDesc = result.rootErrors?.join(', ') || "Please check your input.";
+         toast.error("Validation Error", {
+           description: errorDesc
+         })
+         console.error('Full Submission Result:', result);
+      } else if (result?.message) {
+         toast.error("Failed to Save", {
+           description: result.message
+         })
+         console.error('Server error:', result.message);
+      } else {
+         toast.success("Transaction Saved", {
+           description: `${values.type === 'income' ? '+' : '-'}฿${values.amount} recorded.`
+         })
+         form.reset({
+            type: values.type,
+            amount: '' as any,
+            date: new Date(),
+            walletId: values.walletId,
+            categoryId: undefined,
+            transferToWalletId: undefined,
+            note: '',
+         })
+         if (onSuccess) {
+           // Called from Dashboard — just close + refresh
+           router.refresh()
+           onSuccess()
+         } else {
+           // Called from Transactions page — navigate there
+           router.push('/transactions')
+         }
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsPending(false)
     }
-    setIsPending(false)
   }
 
   const filteredCategories = categories.filter(c => c.type === type)
@@ -111,18 +200,17 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {serverError && <div className="text-red-500 text-sm">{serverError}</div>}
         
           {/* Segmented Control */}
-          <div className="grid grid-cols-3 gap-1 p-1.5 bg-muted/50 rounded-2xl border border-border/50">
+          <div className="grid grid-cols-3 gap-1 p-1 bg-muted/40 rounded-2xl border border-border/40">
            {['income', 'expense', 'transfer'].map((t) => (
              <div 
                key={t}
                className={cn(
-                 "cursor-pointer rounded-xl py-3 text-center text-sm font-bold transition-all flex items-center justify-center gap-2 relative overflow-hidden group",
+                 "cursor-pointer rounded-xl py-2.5 text-center text-sm font-bold transition-all flex items-center justify-center gap-2 relative overflow-hidden group select-none",
                  type === t 
-                  ? "bg-background shadow-md text-foreground ring-1 ring-black/5" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50",
+                  ? "bg-background shadow-sm text-foreground ring-1 ring-black/5 dark:ring-white/10" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/40",
                )}
                onClick={() => form.setValue('type', t as any)}
              >
@@ -133,7 +221,7 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
                   type === t && t === 'transfer' && "bg-blue-500/10 opacity-100",
                 )} />
                 <div className={cn(
-                  "relative flex items-center gap-2",
+                  "relative flex items-center gap-1.5",
                    type === t && t === 'income' && "text-green-600 dark:text-green-400",
                    type === t && t === 'expense' && "text-red-600 dark:text-red-400",
                    type === t && t === 'transfer' && "text-blue-600 dark:text-blue-400"
@@ -143,33 +231,19 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
                 </div>
              </div>
            ))}
-           {/* Hidden Radio Group for logic compatibility */}
-           <div className="hidden">
-             <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
-                  <RadioGroupItem value="income" />
-                  <RadioGroupItem value="expense" />
-                  <RadioGroupItem value="transfer" />
-                </RadioGroup>
-              )} 
-             />
-           </div>
         </div>
 
-        {/* Amount Input - Big & Center */}
+        {/* Amount Input */}
         <FormField
             control={form.control}
             name="amount"
             render={({ field }) => (
-              <FormItem className="relative group">
+              <FormItem className="relative">
                 <FormLabel className="sr-only">Amount</FormLabel>
-                <div className="relative flex justify-center">
-                   <div className="relative w-full max-w-[280px]">
+                <div className="relative flex justify-center py-1">
+                   <div className="relative w-full">
                        <div className={cn(
-                         "absolute left-4 top-1/2 -translate-y-1/2 text-3xl font-black transition-colors pointer-events-none",
+                         "absolute left-8 top-1/2 -translate-y-1/2 text-2xl font-black transition-colors pointer-events-none select-none",
                          type === 'income' ? "text-green-500" : type === 'expense' ? "text-red-500" : "text-blue-500"
                        )}>฿</div>
                        <FormControl>
@@ -178,10 +252,11 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
                             step="0.01" 
                             {...field} 
                             className={cn(
-                              "pl-12 pr-4 h-24 text-5xl font-black border-2 border-transparent bg-muted/30 focus:bg-background hover:bg-muted/50 shadow-sm focus-visible:ring-2 focus-visible:ring-offset-2 text-center transition-all rounded-3xl",
-                              type === 'income' ? "text-green-600 focus-visible:ring-green-500/30" : type === 'expense' ? "text-red-600 focus-visible:ring-red-500/30" : "text-blue-600 focus-visible:ring-blue-500/30"
+                              "pl-12 pr-8 h-16 text-4xl font-black border-none bg-transparent hover:bg-muted/30 focus:bg-muted/30 text-center transition-all rounded-3xl focus-visible:ring-0 shadow-none placeholder:text-muted/20",
+                              type === 'income' ? "text-green-600 caret-green-500" : type === 'expense' ? "text-red-600 caret-red-500" : "text-blue-600 caret-blue-500"
                             )}
                             placeholder="0"
+                            autoFocus
                          />
                        </FormControl>
                    </div>
@@ -191,30 +266,42 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
             )}
           />
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1 -mr-1 custom-scrollbar">
+            {/* Date Selection */}
             <FormField
               control={form.control}
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="text-xs font-semibold text-muted-foreground ml-1">Date</FormLabel>
-                  <Popover>
+                  <FormLabel className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">Date</FormLabel>
+                  <div className="flex gap-2">
+                     <Button 
+                        type="button" 
+                        variant={format(field.value, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? 'default' : 'outline'}
+                        className="flex-1 rounded-xl h-9 text-sm"
+                        onClick={() => field.onChange(new Date())}
+                     >
+                        Today
+                     </Button>
+                     <Button 
+                        type="button" 
+                        variant={format(field.value, 'yyyy-MM-dd') === format(subDays(new Date(), 1), 'yyyy-MM-dd') ? 'default' : 'outline'}
+                        className="flex-1 rounded-xl h-9 text-sm"
+                        onClick={() => field.onChange(subDays(new Date(), 1))}
+                     >
+                        Yesterday
+                     </Button>
+                     <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "w-full pl-3 text-left font-normal h-12 rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border",
+                            "flex-none w-[40px] px-0 rounded-xl border-dashed border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border h-9",
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                          {field.value ? (
-                            format(field.value, "dd MMM yyyy")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
+                          <CalendarIcon className="h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -230,27 +317,35 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
                       />
                     </PopoverContent>
                   </Popover>
+                  </div>
+                  
                   <FormMessage />
                 </FormItem>
               )}
             />
             
+            {/* Wallet Selection */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
                control={form.control}
                name="walletId"
                render={({ field }) => (
                  <FormItem>
-                   <FormLabel className="text-xs font-semibold text-muted-foreground ml-1">{type === 'transfer' ? 'From Wallet' : 'Wallet'}</FormLabel>
+                   <FormLabel className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">{type === 'transfer' ? 'From Wallet' : 'Wallet'}</FormLabel>
                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                      <FormControl>
-                       <SelectTrigger className="h-12 rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border">
+                       <SelectTrigger className="h-10 rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border font-medium text-sm">
                          <SelectValue placeholder="Select wallet" />
                        </SelectTrigger>
                      </FormControl>
                      <SelectContent>
                        {wallets.map((w) => (
                          <SelectItem key={w.id} value={w.id}>
-                           {w.name}
+                           <span className="flex items-center gap-2 text-sm">
+                             <Wallet className="w-3.5 h-3.5 text-muted-foreground" />
+                             {w.name}
+                             <span className="text-xs text-muted-foreground ml-auto">฿{Number(w.balance).toLocaleString()}</span>
+                           </span>
                          </SelectItem>
                        ))}
                      </SelectContent>
@@ -259,18 +354,17 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
                  </FormItem>
                )}
             />
-          </div>
 
-          {type === 'transfer' ? (
+          {type === 'transfer' && (
              <FormField
                control={form.control}
                name="transferToWalletId"
                render={({ field }) => (
                  <FormItem>
-                   <FormLabel className="text-xs font-semibold text-muted-foreground ml-1">To Wallet</FormLabel>
+                   <FormLabel className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">To Wallet</FormLabel>
                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                      <FormControl>
-                       <SelectTrigger className="h-12 rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border">
+                       <SelectTrigger className="h-10 rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border font-medium text-sm">
                          <SelectValue placeholder="Select destination" />
                        </SelectTrigger>
                      </FormControl>
@@ -279,7 +373,10 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
                          .filter(w => w.id !== form.getValues('walletId'))
                          .map((w) => (
                            <SelectItem key={w.id} value={w.id}>
-                             {w.name}
+                             <span className="flex items-center gap-2 text-sm">
+                               <Wallet className="w-3.5 h-3.5 text-muted-foreground" />
+                               {w.name}
+                             </span>
                            </SelectItem>
                          ))}
                      </SelectContent>
@@ -288,44 +385,67 @@ export function TransactionForm({ wallets, categories, onSuccess }: TransactionF
                  </FormItem>
                )}
              />
-           ) : (
+           )}
+           </div>
+
+           {/* Category Grid */}
+           {type !== 'transfer' && (
              <FormField
                 control={form.control}
                 name="categoryId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold text-muted-foreground ml-1">Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-12 rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {filteredCategories.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">Category</FormLabel>
+                    <div className="grid grid-cols-4 gap-2 mt-1">
+                        {filteredCategories.map((c) => {
+                           const Icon = c.icon && IconMap[c.icon] ? IconMap[c.icon] : CircleDollarSign;
+                           const isSelected = field.value === c.id;
+                           
+                           return (
+                             <div 
+                               key={c.id} 
+                               onClick={() => field.onChange(c.id)}
+                               className={cn(
+                                  "flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer transition-all hover:scale-105 active:scale-95",
+                                  isSelected 
+                                    ? "bg-primary/10 border-primary shadow-sm"
+                                    : "bg-background border-border/40 hover:bg-muted/50 hover:border-border"
+                               )}
+                             >
+                                <div className={cn(
+                                   "p-2 rounded-full",
+                                   isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                                )}>
+                                   <Icon className="w-4 h-4" />
+                                </div>
+                                <span className={cn(
+                                   "text-[10px] font-medium text-center truncate w-full leading-tight",
+                                   isSelected ? "text-primary" : "text-muted-foreground"
+                                )}>
+                                  {c.name}
+                                </span>
+                             </div>
+                           )
+                        })}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
              />
            )}
           
+          {/* Note */}
           <FormField
             control={form.control}
             name="note"
             render={({ field }) => (
                <FormItem>
-                 <FormLabel className="text-xs font-semibold text-muted-foreground ml-1">Note</FormLabel>
+                 <FormLabel className="text-xs font-semibold text-muted-foreground ml-1 uppercase tracking-wider">Note (Optional)</FormLabel>
                  <FormControl>
                    <Textarea 
                       placeholder="Add a note..." 
                       {...field} 
-                      className="resize-none rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border min-h-[80px]" 
+                      className="resize-none rounded-xl border-border/60 bg-background/50 hover:bg-background transition-all hover:border-border min-h-[60px] focus:bg-background text-sm" 
                    />
                  </FormControl>
                  <FormMessage />

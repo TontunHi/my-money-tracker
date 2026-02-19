@@ -21,7 +21,9 @@ async function seed() {
       { name: 'Health & Fitness', type: 'expense', icon: 'Heart' },
       { name: 'Travel', type: 'expense', icon: 'Plane' },
       { name: 'Education', type: 'expense', icon: 'GraduationCap' },
+      { name: 'Education', type: 'expense', icon: 'GraduationCap' },
       { name: 'Personal Care', type: 'expense', icon: 'Smile' },
+      { name: 'Game', type: 'expense', icon: 'Gamepad2' },
     ] as const
 
     for (const category of defaultCategories) {

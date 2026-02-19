@@ -1,6 +1,9 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { MainNav, MobileNav } from '@/components/main-nav'
+import { db } from '@/db'
+import { wallets } from '@/db/schema'
+import { eq } from 'drizzle-orm'
 
 export default async function MainLayout({
   children,
@@ -13,6 +16,13 @@ export default async function MainLayout({
   if (authCookie?.value !== 'authenticated') {
     redirect('/login')
   }
+
+  // Fetch real total balance for sidebar
+  const walletsRes = await db.select({ balance: wallets.balance })
+    .from(wallets)
+    .where(eq(wallets.isActive, true))
+  const totalBalance = walletsRes.reduce((acc, w) => acc + Number(w.balance), 0)
+
   return (
     <div className="flex min-h-screen bg-muted/30">
       {/* Desktop Sidebar */}
@@ -32,7 +42,9 @@ export default async function MainLayout({
         <div className="mt-auto px-2">
            <div className="rounded-xl bg-card p-4 border shadow-sm">
               <p className="text-xs text-muted-foreground mb-1">Total Balance</p>
-              <p className="text-lg font-bold text-foreground">฿0.00</p>
+              <p className="text-lg font-bold text-foreground">
+                ฿{totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
            </div>
         </div>
       </aside>
