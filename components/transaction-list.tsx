@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EditTransactionSheet } from '@/components/edit-transaction-sheet'
-import { Pencil } from 'lucide-react'
+import { Pencil, ArrowRightLeft, TrendingUp, TrendingDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 type Transaction = {
   id: string
@@ -26,6 +27,71 @@ type TransactionListProps = {
   categories: { id: string; name: string; type: 'income' | 'expense'; icon?: string | null }[]
 }
 
+const TransactionItem = memo(function TransactionItem({ 
+  tx, 
+  onEdit 
+}: { 
+  tx: Transaction
+  onEdit: (tx: Transaction) => void 
+}) {
+  const isIncome = tx.type === 'income'
+  const isExpense = tx.type === 'expense'
+  const isTransfer = tx.type === 'transfer'
+
+  return (
+    <div
+      className="group flex flex-col sm:flex-row items-center justify-between p-4 rounded-xl hover:bg-secondary/50 transition-all border border-transparent hover:border-border/50"
+    >
+      <div className="flex items-center gap-4 w-full sm:w-auto">
+        <div className={cn(
+          "flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background transition-colors flex-shrink-0",
+        )}>
+           {isIncome ? <TrendingUp className="h-5 w-5" /> : 
+            isExpense ? <TrendingDown className="h-5 w-5" /> : 
+            <ArrowRightLeft className="h-5 w-5" />}
+        </div>
+        <div className="space-y-1 min-w-0">
+          <p className="font-bold text-sm leading-none">
+            {tx.category?.name || (isTransfer ? 'Transfer' : 'Uncategorized')}
+          </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="font-medium">{format(tx.date, 'dd MMM yyyy')}</span>
+            <span className="h-1 w-1 rounded-full bg-border" />
+            <span className="truncate">{tx.wallet.name}</span>
+            {tx.note && (
+              <>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span className="italic truncate max-w-[100px]">{tx.note}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 mt-4 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="text-right">
+          <span className="block text-lg font-bold tracking-tight">
+            {isExpense ? '-' : isIncome ? '+' : ''}
+            ฿{Number(tx.amount).toLocaleString()}
+          </span>
+          <Badge variant="outline" className="mt-1 text-[10px] uppercase tracking-wider font-bold border-primary text-primary bg-transparent rounded-sm px-1.5 py-0">
+            {tx.type}
+          </Badge>
+        </div>
+        
+        <Button
+          variant="ghost"
+          size="icon"
+          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 rounded-lg hover:bg-primary hover:text-primary-foreground"
+          onClick={() => onEdit(tx)}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  )
+})
+
 export function TransactionList({ transactions, wallets, categories }: TransactionListProps) {
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
 
@@ -42,63 +108,7 @@ export function TransactionList({ transactions, wallets, categories }: Transacti
     <>
       <div className="space-y-3">
         {transactions.map((tx) => (
-          <div
-            key={tx.id}
-            className="group flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl bg-card/50 hover:bg-accent/50 transition-all border border-border/50 hover:border-primary/20 shadow-sm hover:shadow-md"
-          >
-            <div className="flex items-center gap-4 w-full sm:w-auto">
-              <div className={`
-                flex h-12 w-12 items-center justify-center rounded-2xl transition-colors flex-shrink-0
-                ${tx.type === 'income' ? 'bg-green-500/10 text-green-600 dark:bg-green-500/20' :
-                  tx.type === 'expense' ? 'bg-red-500/10 text-red-600 dark:bg-red-500/20' :
-                  'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20'}
-              `}>
-                <span className="text-lg font-bold">
-                  {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : '⇄'}
-                </span>
-              </div>
-              <div className="space-y-1 min-w-0">
-                <p className="font-semibold text-base leading-none">
-                  {tx.category?.name || (tx.type === 'transfer' ? 'Transfer' : 'Uncategorized')}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground/80">{format(tx.date, 'dd MMM yyyy')}</span>
-                  <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
-                  <span className="truncate">{tx.wallet.name}</span>
-                  {tx.note && (
-                    <>
-                      <span className="h-1 w-1 rounded-full bg-muted-foreground/30" />
-                      <span className="italic truncate max-w-[100px]">{tx.note}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 mt-4 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end">
-              <div className="text-right">
-                <span className={`block text-lg font-bold tracking-tight ${
-                  tx.type === 'income' ? 'text-green-600' :
-                  tx.type === 'expense' ? 'text-red-600' : 'text-blue-600'
-                }`}>
-                  {tx.type === 'expense' ? '-' : tx.type === 'income' ? '+' : ''}
-                  ฿{Number(tx.amount).toLocaleString()}
-                </span>
-                <Badge variant="outline" className="mt-1 text-[10px] uppercase tracking-wider font-semibold border-border/50 bg-background/50">
-                  {tx.type}
-                </Badge>
-              </div>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="opacity-0 group-hover:opacity-100 transition-opacity h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary"
-                onClick={() => setEditingTx(tx)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <TransactionItem key={tx.id} tx={tx} onEdit={setEditingTx} />
         ))}
       </div>
 

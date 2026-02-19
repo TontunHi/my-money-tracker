@@ -4,18 +4,15 @@ import { MainNav, MobileNav } from '@/components/main-nav'
 import { db } from '@/db'
 import { wallets } from '@/db/schema'
 import { eq } from 'drizzle-orm'
+import { processRecurringRules } from '@/lib/recurring-logic'
 
 export default async function MainLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Server-side auth check (replaces deprecated middleware)
-  const cookieStore = await cookies()
-  const authCookie = cookieStore.get('auth_session')
-  if (authCookie?.value !== 'authenticated') {
-    redirect('/login')
-  }
+  // Process recurring rules on page load
+  await processRecurringRules()
 
   // Fetch real total balance for sidebar
   const walletsRes = await db.select({ balance: wallets.balance })
